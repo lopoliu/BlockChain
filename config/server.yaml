@@ -1,0 +1,20 @@
+server:
+  vip: 'http://192.168.28.66:8600'
+  img: 'http://192.168.28.76:8605'
+  mis: 'http://192.168.28.66:8608'
+  cou: 'ws://192.168.28.24:50501'
+  quo: 'ws://192.168.28.24:50901'
+  k-line: 'http://192.168.28.24:50801'
+  http: 'http://192.168.28.24:50911'
+
+  redis_sms:
+    host: '192.168.28.25'
+    port: '7001'
+
+  test_mysql:
+    host: 'asd'
+    port: 'asd'
+
+  localhost_mysql:
+    host: '127.0.0.1'
+    port: '3307'
