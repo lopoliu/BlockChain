@@ -10,8 +10,10 @@ config.close()
 class SmsRedis(object):
 
     def __init__(self):
-        self.host = conf['server']['redis_sms']['host']
-        self.port = conf['server']['redis_sms']['port']
+        # self.host = conf['server']['redis_sms']['host']
+        self.host = conf['dev_server']['redis_sms']['host']
+        # self.port = conf['server']['redis_sms']['port']
+        self.port = conf['dev_server']['redis_sms']['port']
         nodes = [{"host": self.host, "port": self.port}]
 
         self.r = StrictRedisCluster(startup_nodes=nodes, decode_responses=True)

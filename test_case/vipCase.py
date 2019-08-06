@@ -21,11 +21,11 @@ user_platform = UserPlatform()      # 实例一个vip Api服务器
 api_data = ApiData()
 redis_server = SmsRedis()           # 连接到redis 短信服务器
 mysql_server = MySql()
-
+#
 public_phone = mysql_server.my_phone()
-_info = user_platform.login_account(public_phone)
-public_token = _info['Token']
-public_user_id = _info['Data']['ID']
+info = user_platform.login_account(public_phone)
+public_token = info['Token']
+public_user_id = info['Data']['ID']
 public_price_password = 'a1234567'
 
 
@@ -158,7 +158,6 @@ class Test01GetSms(unittest.TestCase):
         eq = user_platform.login_account(phone_number=user_num, verification_code=correct)
         time.sleep(0.5)
         self.assertEqual(eq['Result']['State'], '验证码错误')
-
 
 
 class Test02RegisterUser(unittest.TestCase):
@@ -583,12 +582,10 @@ class Test07ResetPassword(unittest.TestCase):
                 user_platform.get_sms(unregistered, types=i)
                 code_dict = redis_server.get_value(unregistered, types=i)
                 code = code_dict[unregistered + '_' + str(i)]
-                print(code)
             else:
                 user_platform.get_sms(registered, types=i)
                 code_dict = redis_server.get_value(registered, types=i)
                 code = code_dict[registered + '_' + str(i)]
-                print(code)
             eq = user_platform.reset_password(phone_number=test_user, phone_veri_code=code, token=public_token)
             self.assertEqual(eq['Result']['Msg'], '[1002] 手机验证码错误')
             time.sleep(0.5)
@@ -646,18 +643,16 @@ class Test08BindBank(unittest.TestCase):
     def test_01(self):
         """正常绑定，获取绑定信息，解除绑定银行卡"""
         # 获取所有银行信息
-        print("asd", public_token)
         bank_info = api_data.get_bank_dict(token=public_token)
         time.sleep(2)
         for i in bank_info:
             bank_id = i['ID']
-            print(f"+++开始测试绑定{i['Name']}+++")
             # 进行绑定操作
             eq = user_platform.bind_bank_card(int(bank_id), '64000123456782', 'lopo', '深圳福田车公庙支行', 'a12345678',
                                               public_token)
             time.sleep(0.5)
             # 获取所有绑定信息
-            bank_info = user_platform.get_all_info(_info['Data']['ID'], public_token)
+            bank_info = user_platform.get_all_info(info['Data']['ID'], public_token)
             time.sleep(0.5)
             # 完成绑定并验证后解除绑定
             user_platform.relieve_bank(bank_info['Bank']['ID'], 'a12345678', token=public_token)
@@ -668,13 +663,12 @@ class Test08BindBank(unittest.TestCase):
         """ bank_id长度错误 """
         error_bank_id = ['764482494467201', '7644824944672']
         for i in error_bank_id:
-            print(f"+++账号为{i}+++")
             # 进行绑定操作
             eq = user_platform.bind_bank_card(int(i), '64000123456782', 'lopo',
                                               '深圳福田车公庙支行', 'a12345678', public_token)
             time.sleep(0.5)
             # 获取所有绑定信息
-            bank_info = user_platform.get_all_info(_info['Data']['ID'], public_token)
+            bank_info = user_platform.get_all_info(info['Data']['ID'], public_token)
             # 完成绑定并验证后解除绑定
             time.sleep(0.5)
             user_platform.relieve_bank(bank_info['Bank']['ID'], 'a12345678', public_token)
@@ -689,7 +683,7 @@ class Test08BindBank(unittest.TestCase):
             eq = user_platform.bind_bank_card(76448249446400, i, 'lopo', '深圳福田车公庙支行', 'a12345678', public_token)
             time.sleep(0.5)
             # 获取所有绑定信息
-            bank_info = user_platform.get_all_info(_info['Data']['ID'], public_token)
+            bank_info = user_platform.get_all_info(info['Data']['ID'], public_token)
             time.sleep(0.5)
             # 完成绑定并验证后解除绑定
             user_platform.relieve_bank(bank_info['Bank']['ID'], 'a12345678', public_token)
@@ -702,7 +696,7 @@ class Test08BindBank(unittest.TestCase):
         user_platform.bind_bank_card(76448249446400, '64000123456781', 'lopo', '深圳福田车公庙支行', 'a12345678', public_token)
         time.sleep(0.4)
         # 获取所有绑定信息
-        bank_info = user_platform.get_all_info(_info['Data']['ID'], public_token)
+        bank_info = user_platform.get_all_info(info['Data']['ID'], public_token)
         for i in error_price_password:
             time.sleep(0.5)
             # 完成绑定并验证后解除绑定
@@ -845,7 +839,8 @@ class Test11RealNameAuth(unittest.TestCase):
     def test_01_2(self):
         """ 证件类型为港澳回乡证 """
         token, front, back = self.get_data()
-        eq = user_platform.real_name_auth(card_type=3, id_card_front=front, id_card_back=back, token=token)
+        eq = user_platform.real_name_auth(card_type=3, id_card_front=front, id_card_back=back, token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJHcmVlbiIsImF1dGgiOiIiLCJleHAiOjE1Njc2MDI1MzUsImlhdCI6MTU2NTAxMDQ3NSwiaXNzIjoiR3JlZW4iLCJzdWIiOjEwMDAwMDAxNn0.Re1dMTrKY7a5xmeJnST7MWKlPOWLUfneE7KNA7AvpiM')
+        # eq = user_platform.real_name_auth(card_type=3, id_card_front=front, id_card_back=back, token=token)
         self.assertEqual(eq['Result']['Msg'], '成功')
 
     def test_01_3(self):
@@ -1117,4 +1112,4 @@ class Test19ExtractCoin(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    user_platform.register()

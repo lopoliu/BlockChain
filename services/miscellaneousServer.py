@@ -9,15 +9,23 @@ f.close()
 
 class ApiData(object):
     def __init__(self):
-        self.host = server_conf['server']
+        self.host = server_conf['dev_server']
+        # self.host = server_conf['test_server']
         self.header = {'Version': '0.0', 'Token': ''}
 
-    def get_bank_dict(self, token):
-        api = self.host['mis'] + '/api/dictionary/bank'
+    def get_bank_dict(self, token, only_id=True):
+        logger.info('获取银行字典'.center(30, '*'))
+        api = self.host['mis'] + '/dictionary/bank'
         self.header['Token'] = token
         logger.info(str(self.header))
-        response = requests.post(url=api, headers=self.header)
+        response = requests.post(url=api, headers=self.header, verify=False)
         logger.info(str(response.json()))
+        if only_id:
+            bank_id = []
+            bank_list = response.json()['Data']
+            for i in bank_list:
+                bank_id.append(i['ID'])
+            return bank_id
         return response.json()['Data']
 
     def get_coin_info(self, token):
@@ -25,7 +33,7 @@ class ApiData(object):
         api = self.host['mis'] + '/api/dictionary/coin'
         self.header['Token'] = token
         logger.info(str(self.header))
-        response = requests.post(url=api, headers=self.header)
+        response = requests.post(url=api, headers=self.header, verify=False)
         logger.info(str(response.json()))
         data = response.json()['Data']
         for i in data:

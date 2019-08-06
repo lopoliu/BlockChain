@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*-
 # usr/bin/env python3
 
-import sys
-import copy
 import json
 import yaml
 import random
@@ -11,6 +9,7 @@ from requests.exceptions import ConnectionError
 from fake_useragent import UserAgent
 from logs.log_config import logger
 import time
+
 
 f = open('../config/server.yaml', 'r')
 server_conf = yaml.load(f)
@@ -21,8 +20,10 @@ class UserPlatform(object):
     ua = UserAgent()
     """用户平台"""
     def __init__(self):
-
-        self.host = server_conf['server']
+        self.api_coinrise_vip = r'G:\BlockChain\services\ssl\api_coinrise_vip'
+        self.coinrise_vip = r'G:\BlockChain\services\ssl\coinrise_vip'
+        # self.host = server_conf['server']     # 测试环境
+        self.host = server_conf['dev_server']   # 正式环境
         self.header = {'Version': '0.0', 'Token': '', 'Connection': 'close', 'User-Agent': self.ua.random}
 
     def get_sms(self, phone_number=None, types=1):
@@ -34,11 +35,11 @@ class UserPlatform(object):
         """
         logger.info('获取短信验证码'.center(30, '*'))
         time.sleep(0.2)
-        api = self.host['vip'] + '/api/user/phone/veri'
+        api = self.host['vip'] + '/general/phone/veri'
         data = {"PhoneNumber": phone_number, "Type": types}
         logger.info(str(data))
         time.sleep(0.2)
-        response = requests.post(url=api, headers=self.header, json=data)
+        response = requests.post(url=api, headers=self.header, json=data, verify=False)
         time.sleep(0.2)
         if response.status_code != 200:
             logger.error('服务器未启动'.center(30, "="))
@@ -62,16 +63,15 @@ class UserPlatform(object):
         """
         # 如没有传入手机号参，则随机选取一个未注册的手机号
         if phone_number is None:
-            middle = random.randint(1000, 9999)
-            last = random.randint(1000, 9999)
-            phone_number = '131' + str(middle) + str(last)
+            phone_number = '131' + str(random.randint(1000, 9999)) + str(random.randint(1000, 9999))
         logger.info('注册账号'.center(30, '*'))
-        api = self.host['vip'] + '/api/user/register'  # 构建Api
+        api = self.host['vip'] + '/general/register'  # 构建Api
         data = {'PhoneNumber': phone_number, 'PhoneVerificationCode': code, 'Password': password,
                 'InviteCode': invite_code, 'RegisteredSource': register_source, 'IP': ip, 'MachinID': machin_id}
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
+
         if only_phone:
             return phone_number
         else:
@@ -91,15 +91,17 @@ class UserPlatform(object):
         :param only_token: 只返回token
         :return: response.json
         """
-        api = self.host['vip'] + '/api/user/login'
+        api = self.host['vip'] + '/general/login'
         logger.info(str('进行登录操作').center(30, "*"))
         data = {'PhoneNumber': phone_number, 'Password': password, 'LoginSource': login_source,
                 'PhoneVerificationCode': "", 'IP': ip, 'MachinID': machin_id, 'NeedCode': need_verification_code}
         # 如果为 1 则必须传入验证码
         if need_verification_code == 1:
             data['PhoneVerificationCode'] = verification_code
+            logger.info(str(self.header))
+
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         if response.status_code != 200:
             logger.error('服务器未启动'.center(30, '='))
             raise ConnectionError
@@ -118,13 +120,13 @@ class UserPlatform(object):
         :param u_token:
         :param machin_id:
         """
-        print("使用token进行登录".center(30, '*'))
+        logger.info("使用token进行登录".center(30, '*'))
         api = self.host['vip'] + '/api/user/tokenlogin'
         data = {'LoginSource': login_source, 'IP': ip, 'MachinID': machin_id}
         self.header['Token'] = u_token
         logger.info(str(self.header))
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -134,7 +136,7 @@ class UserPlatform(object):
         logger.info('获取当前用户信息'.center(30, '*'))
         self.header['Token'] = tokens
         logger.info(str(self.header))
-        response = requests.post(url=api, headers=self.header)
+        response = requests.post(url=api, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -151,7 +153,7 @@ class UserPlatform(object):
         data = {'Image': img_address}
         logger.info(str(self.header))
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -164,11 +166,11 @@ class UserPlatform(object):
         :param new_password: 新密码
         """
         logger.info('重置密码'.center(30, '*'))
-        api = self.host['vip'] + '/api/user/pw/reset'
+        api = self.host['vip'] + '/general/pw/reset'
         data = {'PhoneNumber': phone_number, 'PhoneVeriCode': phone_veri_code, 'NewPassword': new_password}
-        logger.info(str(data))
         self.header['Token'] = token
-        response = requests.post(url=api, json=data, headers=self.header)
+        logger.info(str(data))
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -184,7 +186,7 @@ class UserPlatform(object):
         self.header['Token'] = token
         data = {'NewPassword': new_password, 'PhoneVeriCode': phone_veri_code}
         logger.info(str(data))
-        response = requests.post(url=api, data=data, headers=self.header)
+        response = requests.post(url=api, data=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response
 
@@ -199,11 +201,12 @@ class UserPlatform(object):
         api = self.host + '/api/user/phone/vericheck'
         data = {'PhoneNumber': phone_number, 'VerificationCode': verification_code, 'Type': types}
         logger.info(str(data))
-        response = requests.post(url=api, data=data, headers=self.header)
+        response = requests.post(url=api, data=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response
 
-    def bind_bank_card(self, bank_id: int, card_number: str, card_owner: str, bank_addr: str, password: str, token):
+    def bind_bank_card(self, bank_id: int, card_number: str, card_owner: str,
+                       bank_addr: str, price_password: str, token):
         """
         绑定银行卡
         :param token: 账户token
@@ -214,12 +217,13 @@ class UserPlatform(object):
         :param password:  资金密码
         """
         logger.info('绑定银行卡'.center(30, '*'))
-        api = self.host['vip'] + '/api/user/bank/bind'
+        api = self.host['vip'] + '/general/bank/bind'
         data = {'BankID': bank_id, 'CardNumber': card_number, 'CardOwner': card_owner,
-                'BankAddr': bank_addr, 'Password': password}
+                'BankAddr': bank_addr, 'Password': price_password}
         self.header['Token'] = token
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
+        print(response.status_code)
         logger.info(str(response.json()))
         return response.json()
 
@@ -235,7 +239,7 @@ class UserPlatform(object):
         data = {'ID': u_id, 'Password': password}
         self.header['Token'] = token
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         self.header.pop('Token')
         return response.json()
@@ -258,12 +262,12 @@ class UserPlatform(object):
         :param token: token
         """
         logger.info('设定资金密码'.center(30, '*'))
-        api = self.host['vip'] + '/api/user/fundpw/set'
+        api = self.host['vip'] + '/general/fundpw/set'
         self.header['Token'] = token
         data = {'PhoneVeriCode': phone_vericode, 'Password': password}
         logger.info(str(self.header))
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -282,7 +286,7 @@ class UserPlatform(object):
         self.header['Token'] = tokens
         logger.info(str(self.header))
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -292,7 +296,7 @@ class UserPlatform(object):
         api = self.host + '/api/user/fundpw/check'
         self.header['Token'] = token
         logger.info(str(self.header))
-        response = requests.post(url=api, headers=self.header)
+        response = requests.post(url=api, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response
 
@@ -315,12 +319,12 @@ class UserPlatform(object):
             last = random.randint(1000000, 9999999)
             card_code = str(before) + str(last)
         logger.info('实名认证操作'.center(30, '*'))
-        api = self.host['vip'] + '/api/user/real/check'
+        api = self.host['vip'] + '/general/real/check'
         data = {'Name': name, 'Country': country, 'Complex': complexs, 'Address': address, 'CardType': card_type,
                 'CardCode': card_code, 'IDCardFront': id_card_front, 'IDCardBack': id_card_back}
         self.header['Token'] = token
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -330,7 +334,7 @@ class UserPlatform(object):
         api = self.host + '/api/user/real/search'
         self.header['Token'] = token
         logger.info(str(self.header))
-        response = requests.post(url=api, headers=self.header)
+        response = requests.post(url=api, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response
 
@@ -340,7 +344,7 @@ class UserPlatform(object):
         api = self.host['vip'] + '/api/user/real/cancel'
         self.header['Token'] = token
         logger.info(str(self.header))
-        response = requests.post(url=api, headers=self.header)
+        response = requests.post(url=api, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -360,7 +364,7 @@ class UserPlatform(object):
         if expired_time is not None:
             data['expiredTime'] = expired_time
         logger.info(str(data))
-        response = requests.post(url=api, data=data, files=files, headers=self.header)
+        response = requests.post(url=api, data=data, files=files, headers=self.header, verify=False)
         logger.info(str(response.json()))
         img_url = json.loads(response.text)['Msg']
         return img_url
@@ -380,7 +384,7 @@ class UserPlatform(object):
         data = {'Account': account, 'Mark': mark, 'Password': password, 'PayQRImage': img_address, 'PayType': pay_type}
         self.header['Token'] = token
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -396,7 +400,7 @@ class UserPlatform(object):
         data = {'ID': u_id, 'Password': password}
         self.header['Token'] = token
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -412,7 +416,7 @@ class UserPlatform(object):
         data = {'UserID': user_id}
         self.header['Token'] = token
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         if only_id:
             try:
@@ -437,7 +441,7 @@ class UserPlatform(object):
         self.header['Token'] = token
         data = {'UserID': user_id}
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -448,12 +452,12 @@ class UserPlatform(object):
         :param coin_id:
         """
         logger.info('创建钱包'.center(30, '*'))
-        api = self.host["vip"] + '/api/user/wallet/create'
+        api = self.host["vip"] + '/general/wallet/create'
         data = {'CoinID': coin_id}
         self.header['Token'] = token
         logger.info(str(self.header))
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -468,17 +472,17 @@ class UserPlatform(object):
         data = {'CoinID': str(coin_id)}
         logger.info(str(data))
         self.header['Token'] = token
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
     def get_all_wallet(self, token):
         """ 获取用户所有钱包 """
         logger.info('获取用户所有钱包'.center(30, '*'))
-        api = self.host['vip'] + '/api/user/wallet/searchall'
+        api = self.host['vip'] + '/general/wallet/searchall'
         self.header['Token'] = token
         logger.info(str(self.header))
-        response = requests.post(url=api, headers=self.header)
+        response = requests.post(url=api, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -493,12 +497,12 @@ class UserPlatform(object):
         :param end_time:
         """
         logger.info('获取币种信息'.center(30, '*'))
-        api = self.host['vip'] + '/api/user/wallet/rebate/search'
+        api = self.host['vip'] + '/general/wallet/rebate/search'
         data = {'CoinID': coin_id, 'StartTime': start_time, 'PageIndex': page_index,
                 'PageCount': page_count, 'EndTime': end_time}
         self.header['Token'] = token
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -515,7 +519,7 @@ class UserPlatform(object):
         data = {'RecordType': record_type, 'PageIndex': page_index, 'PageCount': page_count}
         self.header['Token'] = token
         logger.info(str(data))
-        response = requests.post(url=api, json=data, headers=self.header)
+        response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
@@ -534,6 +538,11 @@ class UserPlatform(object):
         data = {'CoinID': coin_id, 'Amount': amount, 'Decimal': decimal, 'Password': password,
                 'Address': address, 'PhoneVeriCode': phone_veri_code}
         logger.info(str(data))
-        response = requests.post(url=api, data=data, headers=self.header)
+        response = requests.post(url=api, data=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
+
+
+if __name__ == '__main__':
+    x = UserPlatform()
+    x.register()

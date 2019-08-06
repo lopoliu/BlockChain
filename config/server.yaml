@@ -1,4 +1,4 @@
-server:
+test_server:
   vip: 'http://192.168.28.66:8600'
   img: 'http://192.168.28.76:8605'
   mis: 'http://192.168.28.66:8608'
@@ -18,3 +18,14 @@ server:
   localhost_mysql:
     host: '127.0.0.1'
     port: '3307'
+
+dev_server:
+  vip: 'https://api.coinrise.vip/user'
+  img: 'https://api.coinrise.vip/file'
+  mis: 'https://api.coinrise.vip/messy'
+  cou: ''
+  k-line: ''
+
+  redis_sms:
+    host: '172.31.6.10'
+    port: '23306'
