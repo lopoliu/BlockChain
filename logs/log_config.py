@@ -23,11 +23,11 @@ if not os.path.exists(log_dir_path):
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)  # 输出到控制台
 
-output = logging.FileHandler(log_dir_path, mode='a', encoding='utf-8')    # 输出到log文件，追加方式
-output.setLevel(logging.INFO)
+output = logging.FileHandler(log_dir_path, mode='a', encoding='utf-8')
+output.setLevel(logging.INFO)   # 输出到log文件，追加方式
 
 # 配置日志格式
-formatter = logging.Formatter("%(asctime)s-<%(funcName)s>-%(levelname)s-||%(message)s")
+formatter = logging.Formatter("%(asctime)s-<%(funcName)s>-%(levelname)s->>%(message)s")
 console.setFormatter(formatter)
 output.setFormatter(formatter)
 
