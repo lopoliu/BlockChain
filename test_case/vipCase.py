@@ -21,7 +21,7 @@ user_platform = UserPlatform()      # 实例一个vip Api服务器
 api_data = ApiData()
 redis_server = SmsRedis()           # 连接到redis 短信服务器
 mysql_server = MySql()
-#
+
 public_phone = mysql_server.my_phone()
 info = user_platform.login_account(public_phone)
 public_token = info['Token']
@@ -34,7 +34,7 @@ class Test01GetSms(unittest.TestCase):
     def test_01(self):
         """ 正常输入 输入PhoneNumber参数值为1开头的11位数字，如 """
 
-        # 获取已个可以接受短信的手机号
+        # 从数据库获取一个可以接收短信的手机号
         phone = mysql_server.send_number()
         eq = user_platform.get_sms(phone, types=5)
         self.assertEqual(eq['Result']['Msg'], '成功')
@@ -185,20 +185,20 @@ class Test02RegisterUser(unittest.TestCase):
         phone_list = [error_phone1, error_phone2]
         for i in phone_list:
             eq = user_platform.register(i)
-            self.assertEqual(eq['Result']['Msg'], "手机号错误")
+            self.assertEqual(eq['Result']['Msg'], '手机号错误')
 
     def test_04(self):
         """ 输入PhoneNumber参数包含字母 """
         last = random.randint(1000000, 9999999)
         for i in range(3):
-            phone = str(last) + "12a"
+            phone = str(last) + '12a'
             eq = user_platform.register(phone)
-            self.assertEqual(eq['Result']['Msg'], "手机号错误")
+            self.assertEqual(eq['Result']['Msg'], '手机号错误')
 
     def test_05(self):
         """ 输入PhoneNumber参数值为空 """
         eq = user_platform.register(phone_number='')
-        self.assertEqual(eq['Result']['Msg'], "[21] 参数错误")
+        self.assertEqual(eq['Result']['Msg'], '[21] 参数错误')
 
     def test_07(self):
         """ 输入的PhoneNumber参数为已注册手机号 """
@@ -208,7 +208,7 @@ class Test02RegisterUser(unittest.TestCase):
     def test_08(self):
         """ 输入PhoneVerificationCode参数值长度错误 """
         verification_code = random.randint(0, 99999)
-        eq = user_platform.register(phone_number="17788887777", code=verification_code)
+        eq = user_platform.register(phone_number='17788887777', code=verification_code)
         self.assertEqual(eq['Result']['Msg'], '[21] 参数错误')
         time.sleep(0.5)
 
@@ -238,7 +238,7 @@ class Test02RegisterUser(unittest.TestCase):
 
     def test_12(self):
         """ 密码长度设置为8、16位 """
-        password_list = ['a1234567', 'abcdabcd12345678']
+        password_list = ['a1234567', 'name12345678']
         for i in password_list:
             eq = user_platform.register(password=i)
             self.assertNotEqual(eq['Result']['Msg'], '成功')
@@ -246,7 +246,7 @@ class Test02RegisterUser(unittest.TestCase):
     def test_13(self):
         """ password长度错误 """
         # Todo: 此功能未实现
-        password_list = ["a123456", "abcdefghi1234567890"]
+        password_list = ['a123456', 'name1234567890']
         for i in password_list:
             eq = user_platform.register(password=i)
             self.assertNotEqual(eq['Result']['Msg'], '成功')
@@ -270,12 +270,12 @@ class Test02RegisterUser(unittest.TestCase):
     def test_16(self):
         """ 邀请码为空 """
         # 邀请码默参数可以为空
-        eq = user_platform.register(invite_code="")
+        eq = user_platform.register(invite_code='')
         self.assertEqual(eq['Result']['Msg'], '成功')
 
     def test_17(self):
         """ 输入InviteCode参数值为不存在的邀请码 """
-        eq = user_platform.register(invite_code="Ab1234")
+        eq = user_platform.register(invite_code='Ab1234')
         self.assertNotEqual(eq['Result']['Msg'], '邀请码不存在')
 
     def test_18(self):
@@ -328,7 +328,7 @@ class Test03Login(unittest.TestCase):
         """ 正常登陆  """
         eq = user_platform.login_account(public_phone)
         # 验证Token不为空则是登陆成功
-        self.assertNotEqual(eq['Token'], "")
+        self.assertNotEqual(eq['Token'], '')
 
     def test_02(self):
         """ 输入一个错误的手机号 开头错误，长度错误, 未注册 """
@@ -349,15 +349,15 @@ class Test03Login(unittest.TestCase):
     def test_04(self):
         """ 登陆密码是否区分大小写 正确密码为：zxc123.. """
         _phone = mysql_server.my_phone()
-        error_pwd = "zxc123..".upper()
+        error_pwd = 'zxc123..'.upper()
         eq = user_platform.login_account(phone_number=_phone, password=error_pwd)
         self.assertEqual(eq['Result']['Msg'], '[1007] 密码错误')
 
     def test_05(self):
         """登陆密码错误上限账户被锁定"""
         # Todo: 暂未实现
-        _phone = "13100030001"      # 请勿修改这个变量值
-        _error = "zxc123"
+        _phone = '13100030001'      # 请勿修改这个变量值
+        _error = 'zxc123'
         for i in range(5):
             user_platform.login_account(_phone, _error)
         eq = user_platform.login_account()
@@ -428,9 +428,6 @@ class Test03Login(unittest.TestCase):
 
     def test_14(self):
         """ MachinID 设备id """
-        pass
-
-    def test_15(self):
         pass
 
 
@@ -530,13 +527,12 @@ class Test06ModifyHead(unittest.TestCase):
 
     def test_03(self):
         """ 修改头像，图片地址错误 """
-        img_url = "htt://test.png"
+        img_url = 'htt://test.png'
         eq = user_platform.modify_head_img(img_address=img_url, token=public_token)
         time.sleep(0.5)
         self.assertEqual(eq['Result']['Msg'], '成功')
 
     def test_04(self):
-        """ 修改头像，token错误"""
         """ 修改头像，图片大于2m"""
         # 上传图片服务器
         img_url = user_platform.upload_img('../img/2M.jpg', public_user_id, 'user', token=public_token)
@@ -562,7 +558,7 @@ class Test07ResetPassword(unittest.TestCase):
 
     def test_02(self):
         """正常重置密码"""
-        eq = user_platform.reset_password(public_phone, token=public_token)
+        eq = user_platform.reset_password('13100010001', token=public_token)
         self.assertEqual(eq['Result']['Msg'], '成功')
 
     def test_03(self):
@@ -599,7 +595,7 @@ class Test07ResetPassword(unittest.TestCase):
 
     def test_06(self):
         """正常修改"""
-        ok_password = ['a1234567', 'abcdabcd12345678', 'zxc123..']
+        ok_password = ['a1234567', 'password12345678', 'zxc123..']
         for i in ok_password:
             eq = user_platform.reset_password(phone_number=public_phone, new_password=i, token=public_token)
             self.assertEqual(eq['Result']['Msg'], '成功')
@@ -615,7 +611,7 @@ class Test07ResetPassword(unittest.TestCase):
     def test_08(self):
         """密码只包含一种字符"""
         # Todo: 预期与实际不符
-        error_password = ['aaaaabbbbb', '123456789', '@@@@@@@@@']
+        error_password = ['password', '123456789', '@@@@@@@@@']
         for i in error_password:
             eq = user_platform.reset_password(new_password=i, token=public_token)
             self.assertNotEqual(eq['Result']['Msg'], '成功')
@@ -692,7 +688,7 @@ class Test08BindBank(unittest.TestCase):
 
     def test_04(self):
         """解绑银行卡，资金密码错误"""
-        error_price_password = ["a1234567", '1234567', "123a4564"]
+        error_price_password = ['a1234567', '1234567', "123a4564"]
         user_platform.bind_bank_card(76448249446400, '64000123456781', 'lopo', '深圳福田车公庙支行', 'a12345678', public_token)
         time.sleep(0.4)
         # 获取所有绑定信息
@@ -708,8 +704,8 @@ class Test08BindBank(unittest.TestCase):
         user = user_platform.login_account("13171362796")
         bank_info = user_platform.get_all_info(user['Data']['ID'], token=user['Token'])
         ids = bank_info['Bank']['ID']
-        user_platform.relieve_bank(u_id=ids, password="a12345678", token=public_token)
-        eq = user_platform.relieve_bank(u_id=ids, password="a12345678", token=public_token)
+        user_platform.relieve_bank(u_id=ids, password='a12345678', token=public_token)
+        eq = user_platform.relieve_bank(u_id=ids, password='a12345678', token=public_token)
         self.assertEqual(eq['Result']['Msg'], '[21] 参数错误')
 
 
@@ -732,7 +728,7 @@ class Test09SetPricePassword(unittest.TestCase):
 
     def test_03(self):
         """ 资金密码不符合要求 """
-        price_password = ['', "1", '@']
+        price_password = ['', 'a12345678', '@']
         new_user = user_platform.register(only_phone=True)
         user_info = user_platform.login_account(new_user)
         token = user_info['Token']
@@ -783,13 +779,13 @@ class Test10ModifyPricePassword(unittest.TestCase):
 
     def test_02(self):
         """ 重置资金密码 token错误"""
-        eq = user_platform.modify_price_password(self.price, 'a12345678', tokens="qweqwe")
-        self.assertEqual(eq['Result']['Msg'], "[20] 身份验证失败")
+        eq = user_platform.modify_price_password(self.price, 'a12345678', tokens='ErrorToken')
+        self.assertEqual(eq['Result']['Msg'], '[20] 身份验证失败')
 
     def test_03(self):
         """ 重置资金密码 新密码与旧密码相同 """
         eq = user_platform.modify_price_password(self.price, self.price, tokens=public_token)
-        self.assertEqual(eq['Result']['Msg'], "成功")
+        self.assertEqual(eq['Result']['Msg'], '成功')
 
     def test_04(self):
         """ 重置资金密码 资金密码与登录密码一致 """
@@ -797,7 +793,7 @@ class Test10ModifyPricePassword(unittest.TestCase):
         time.sleep(0.5)
         user_platform.modify_price_password(new_password=self.price, old_password='zxc123..', tokens=public_token)
         time.sleep(0.5)
-        self.assertNotEqual(eq['Result']['Msg'], "成功")
+        self.assertNotEqual(eq['Result']['Msg'], '成功')
 
     def test_05(self):
         """ 资金密码设置为空 """
@@ -839,8 +835,7 @@ class Test11RealNameAuth(unittest.TestCase):
     def test_01_2(self):
         """ 证件类型为港澳回乡证 """
         token, front, back = self.get_data()
-        eq = user_platform.real_name_auth(card_type=3, id_card_front=front, id_card_back=back, token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJHcmVlbiIsImF1dGgiOiIiLCJleHAiOjE1Njc2MDI1MzUsImlhdCI6MTU2NTAxMDQ3NSwiaXNzIjoiR3JlZW4iLCJzdWIiOjEwMDAwMDAxNn0.Re1dMTrKY7a5xmeJnST7MWKlPOWLUfneE7KNA7AvpiM')
-        # eq = user_platform.real_name_auth(card_type=3, id_card_front=front, id_card_back=back, token=token)
+        eq = user_platform.real_name_auth(card_type=3, id_card_front=front, id_card_back=back, token=token)
         self.assertEqual(eq['Result']['Msg'], '成功')
 
     def test_01_3(self):
@@ -862,11 +857,11 @@ class Test11RealNameAuth(unittest.TestCase):
         """卡号为空"""
         token, front, back = self.get_data()
         eq = user_platform.real_name_auth(id_card_front=front, id_card_back=back, token=token, card_code="")
-        self.assertNotEqual(eq['Result']['Msg'], "成功")
+        self.assertNotEqual(eq['Result']['Msg'], '成功')
 
     def test_04(self):
         """ 重复提交 """
-        _user_num = "17323131132"
+        _user_num = '17323131132'
         _token = user_platform.login_account(_user_num, only_token=True)
         _front = 'http://192.168.28.76:8605/static/identity_authentication/100001700/user_100001700_1564564585000.png'
         _back = 'http://192.168.28.76:8605/static/identity_authentication/100001700/user_100001700_1564564586000.png'
@@ -896,8 +891,8 @@ class Test12BindQrCode(unittest.TestCase):
         img_url = user_platform.upload_img(file_path='../img/pay.jpg', account=public_user_id,
                                            types='user', token=public_token)
         time.sleep(0.5)
-        eq = user_platform.bind_qr_img(img_address=img_url, pay_type=2, account="支付宝",
-                                       password="a12345678", token=public_token)
+        eq = user_platform.bind_qr_img(img_address=img_url, pay_type=2, account='支付宝',
+                                       password='a12345678', token=public_token)
         time.sleep(0.5)
         # 测试完成后立即取消绑定
         qr_id = user_platform.get_qr_code(public_user_id, public_token, only_id=True)
@@ -907,11 +902,13 @@ class Test12BindQrCode(unittest.TestCase):
 
     def test_01_01(self):
         """ 绑定收款二维码 微信"""
+        # 上传图片到图片服务器 返回图片地址
         img_url = user_platform.upload_img(file_path='../img/pay.jpg', account=public_user_id,
                                            types='user', token=public_token)
         time.sleep(0.5)
-        eq = user_platform.bind_qr_img(img_address=img_url, pay_type=3, account="微信",
-                                       password="a12345678", token=public_token)
+        # 绑定收款码
+        eq = user_platform.bind_qr_img(img_address=img_url, pay_type=3, account='微信',
+                                       password='a12345678', token=public_token)
         time.sleep(0.5)
         # 测试完成后立即取消绑定
         qr_id = user_platform.get_qr_code(public_user_id, public_token, only_id=True)
@@ -924,8 +921,8 @@ class Test12BindQrCode(unittest.TestCase):
         img_url = user_platform.upload_img(file_path='../img/pay.jpg', account=public_user_id,
                                            types='user', token=public_token)
         time.sleep(0.5)
-        eq = user_platform.bind_qr_img(img_address=img_url, pay_type=1, account="银行卡",
-                                       password="a12345678", token=public_token)
+        eq = user_platform.bind_qr_img(img_address=img_url, pay_type=1, account='银行卡',
+                                       password='a12345678', token=public_token)
         time.sleep(0.5)
         # 测试完成后立即取消绑定
         qr_id = user_platform.get_qr_code(public_user_id, public_token, only_id=True)
@@ -937,10 +934,10 @@ class Test12BindQrCode(unittest.TestCase):
         """多次绑定"""
         img_url = user_platform.upload_img(file_path='../img/pay.jpg', account=public_user_id,
                                            types='user', token=public_token)
-        user_platform.bind_qr_img(img_address=img_url, pay_type=2, account="支付宝",
-                                  password="a12345678", token=public_token)
-        eq = user_platform.bind_qr_img(img_address=img_url, pay_type=2, account="支付宝",
-                                       password="a12345678", token=public_token)
+        user_platform.bind_qr_img(img_address=img_url, pay_type=2, account='支付宝',
+                                  password='a12345678', token=public_token)
+        eq = user_platform.bind_qr_img(img_address=img_url, pay_type=2, account='支付宝',
+                                       password='a12345678', token=public_token)
         self.assertEqual(eq['Result']['Msg'], "[3] 数据已存在")
 
 
@@ -1012,7 +1009,7 @@ class Test14CreateWallet(unittest.TestCase):
         """ token错误 """
         error_token = ['', "i'm is tokens"]
         for i in error_token:
-            eq = user_platform.create_wallet(coin_id="BTC", token=i)
+            eq = user_platform.create_wallet(coin_id='BTC', token=i)
             self.assertEqual(eq['Result']['Msg'], '[20] 身份验证失败')
 
     def test_05(self):

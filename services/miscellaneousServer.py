@@ -8,18 +8,20 @@ f.close()
 
 
 class ApiData(object):
+    # 杂项服务器
     def __init__(self):
         self.host = server_conf['dev_server']
         # self.host = server_conf['test_server']
         self.header = {'Version': '0.0', 'Token': ''}
 
-    def get_bank_dict(self, token, only_id=True):
-        logger.info('获取银行字典'.center(30, '*'))
+    def get_bank_dict(self, token, only_id=True) -> list or dict:
+        # only_id为true时，返回已个包含银行ID的列表
+        # logger.info('获取银行字典'.center(30, '*'))
         api = self.host['mis'] + '/dictionary/bank'
         self.header['Token'] = token
-        logger.info(str(self.header))
+        # logger.info(str(self.header))
         response = requests.post(url=api, headers=self.header, verify=False)
-        logger.info(str(response.json()))
+        # logger.info(str(response.json()))
         if only_id:
             bank_id = []
             bank_list = response.json()['Data']
@@ -28,9 +30,10 @@ class ApiData(object):
             return bank_id
         return response.json()['Data']
 
-    def get_coin_info(self, token):
+    def get_coin_info(self, token) -> list:
+        # 返回一个列表，包含所有币种名称
         coin_list = []
-        api = self.host['mis'] + '/api/dictionary/coin'
+        api = self.host['mis'] + '/messy/dictionary/coin'
         self.header['Token'] = token
         logger.info(str(self.header))
         response = requests.post(url=api, headers=self.header, verify=False)
@@ -43,7 +46,5 @@ class ApiData(object):
 
 if __name__ == '__main__':
     x = ApiData()
-    w = x.get_bank_dict(token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJHcmVlbiIsImF1dGgiOiIiLCJl'
-                              'eHAiOjE1NjcwNzEzNDgsImlhdCI6MTU2NDQ3OTI4OCwiaXNzIjoiR3JlZW4iLCJzdWIiOjEwM'
-                              'DAwMTcwMH0.4zUWB2lQ7iSDKboDOMG9KSGBGAAmSAGJ9xGKmJ6U6XI')
-    print(w)
+    m = x.get_bank_dict(token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJHcmVlbiIsImF1dGgiOiIiLCJleHAiOjE1Njc2NjcyMzMsImlhdCI6MTU2NTA3NTE3MywiaXNzIjoiR3JlZW4iLCJzdWIiOjEwMDAwMDAwMn0.DPzRFdnNgm46reJ5hygOFaD65oNfonHqmd2tdL-suv8')
+    print(m)

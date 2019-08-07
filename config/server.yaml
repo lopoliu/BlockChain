@@ -24,6 +24,7 @@ dev_server:
   img: 'https://api.coinrise.vip/file'
   mis: 'https://api.coinrise.vip/messy'
   cou: ''
+  C2C: 'https://api.coinrise.vip/c2c'
   k-line: ''
 
   redis_sms:
