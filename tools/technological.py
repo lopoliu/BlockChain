@@ -7,7 +7,7 @@ api_data = ApiData()
 #
 # x = sever.register(invite_code='2FcMFg', only_phone=True)     # 注册
 #
-user_info = sever.login_account(phone_number='13165188582')       # 13139504378 13165188582
+user_info = sever.login_account(phone_number='13165188582')       # 13165188582
 sever.get_sms(phone_number='17322311020')       # 向该号码发送一条短信
 sever.real_name_auth(token=user_info['Token'])      # 实名认证
 sever.set_price_password(token=user_info['Token'])  # 设置资金密码
