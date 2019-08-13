@@ -1,16 +1,18 @@
+# -*- coding: utf-8 -*-
+# usr/bin/env python3
+
+
 from fake_useragent import UserAgent
+import requests
+import yaml
+
 from logs.log_config import logger
 from services.vipServer import UserPlatform
-import yaml
-import requests
 
 
 f = open('../config/server.yaml', 'r')
 server_conf = yaml.load(f)
 f.close()
-tokens = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJHcmVlbiIsImF1dGgiOiIiLCJleHAi" \
-         "OjE1Njc3Mzk1MDUsImlhdCI6MTU2NTE0NzQ0NSwiaXNzIjoiR3JlZW4iLCJzdWIiOjEwMDAwMDA1NX0.a" \
-         "9qp77cVKPyztM_PX0bKu81AkRtzdeY0Bc_J-xVwz44"
 
 
 class C2CServer(object):
@@ -25,7 +27,7 @@ class C2CServer(object):
 
     def add_buy(self, u_id, biz_id=0, buy_type=1, decimal=2, amount=100,
                 price=22200, payment_method=2, token=None, price_token=None):
-        """买入"""
+        """ 买入 """
         logger.info('用户新增买单'.center(30, '*'))
         api = self.host + '/v1/user/order/addbuy'
         self.header['Token'] = token
@@ -38,7 +40,7 @@ class C2CServer(object):
 
     def add_sell(self, u_id, biz_id=0, buy_type=1, decimal=2, amount=100,
                  price=22200, payment_method=2, token=None, price_token=None):
-        """  用户新增卖单 """
+        """ 用户新增卖单 """
         logger.info('用户新增卖单'.center(30, '*'))
         api = self.host + '/v1/user/order/addsell'
         self.header['Token'] = token
@@ -51,12 +53,10 @@ class C2CServer(object):
 
 
 if __name__ == '__main__':
-    #
     u = UserPlatform()
     x = C2CServer()
     user_info = u.login_account('13100010002')
-    p = u.check_price_password(user_info['Token'], 'a12345678')
+    p = u.check_price_token(user_info['Token'], 'a12345678')
     # price_token = u.wallet_token(user_info['Token'], p['Token'])
     x.add_sell(u_id=user_info['Data']['ID'], token=user_info['Token'], price_token=p)
     x.add_buy(u_id=user_info['Data']['ID'], token=user_info['Token'], price_token=p)
-

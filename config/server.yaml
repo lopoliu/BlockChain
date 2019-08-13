@@ -23,6 +23,7 @@ dev_server:
   vip: 'https://api.coinrise.vip/user'
   img: 'https://api.coinrise.vip/file'
   mis: 'https://api.coinrise.vip/messy'
+  qtt: 'wss://coinrise.vip/distribute'
   cou: ''
   C2C: 'https://api.coinrise.vip/c2c'
   k-line: ''

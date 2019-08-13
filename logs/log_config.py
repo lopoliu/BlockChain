@@ -10,7 +10,7 @@ now_data = time.strftime("%Y-%m-%d", time.localtime())
 
 file_path = str(now_data) + '.log'
 
-path = r'G:\BlockChain\logs'
+path = r'F:\BlockChain\logs'
 # log保存位置
 log_dir_path = path + "\\" + file_path
 

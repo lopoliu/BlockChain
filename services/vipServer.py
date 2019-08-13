@@ -11,7 +11,7 @@ from logs.log_config import logger
 import time
 
 
-f = open('G:/BlockChain/config/server.yaml', 'r')
+f = open('F:/BlockChain/config/server.yaml', 'r')
 server_conf = yaml.load(f)
 f.close()
 
@@ -49,10 +49,13 @@ class UserPlatform(object):
         # 如没有传入手机号参，则随机选取一个未注册的手机号
         if phone_number is None:
             phone_number = '131' + str(random.randint(1000, 9999)) + str(random.randint(1000, 9999))
+
         logger.info('注册账号'.center(30, '*'))
         api = self.host['vip'] + '/general/register'  # 构建Api
+
         data = {'PhoneNumber': phone_number, 'PhoneVerificationCode': code, 'Password': password,
                 'InviteCode': invite_code, 'RegisteredSource': register_source, 'IP': ip, 'MachinID': machin_id}
+
         logger.info(str(data))
         response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
@@ -214,7 +217,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def check_price_password(self, token, price_password, only_price_token=True):
+    def check_price_token(self, token, price_password, only_price_token=True):
         """ 检验资金密码 """
         logger.info('校验资金密码'.center(30, '*'))
         api = self.host['vip'] + '/general/fundpw/check'

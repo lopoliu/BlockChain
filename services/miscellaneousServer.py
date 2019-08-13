@@ -16,12 +16,12 @@ class ApiData(object):
 
     def get_bank_dict(self, token, only_id=True) -> list or dict:
         # only_id为true时，返回已个包含银行ID的列表
-        # logger.info('获取银行字典'.center(30, '*'))
+        logger.info('获取银行字典'.center(30, '*'))
         api = self.host['mis'] + '/dictionary/bank'
         self.header['Token'] = token
-        # logger.info(str(self.header))
+        logger.info(str(self.header))
         response = requests.post(url=api, headers=self.header, verify=False)
-        # logger.info(str(response.json()))
+        logger.info(str(response.json()))
         if only_id:
             bank_id = []
             bank_list = response.json()['Data']
@@ -46,5 +46,3 @@ class ApiData(object):
 
 if __name__ == '__main__':
     x = ApiData()
-    m = x.get_bank_dict(token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJHcmVlbiIsImF1dGgiOiIiLCJleHAiOjE1Njc2NjcyMzMsImlhdCI6MTU2NTA3NTE3MywiaXNzIjoiR3JlZW4iLCJzdWIiOjEwMDAwMDAwMn0.DPzRFdnNgm46reJ5hygOFaD65oNfonHqmd2tdL-suv8')
-    print(m)

@@ -180,8 +180,8 @@ class Test02RegisterUser(unittest.TestCase):
         """ 输入PhoneNumber参数值为12/10位数字(长度错误)"""
         before = random.randint(1000, 9999)
         last = random.randint(1000, 9999)
-        error_phone1 = '1321'+str(before) + str(last)
-        error_phone2 = '13'+str(before) + str(last)
+        error_phone1 = '1321' + str(before) + str(last)
+        error_phone2 = '13' + str(before) + str(last)
         phone_list = [error_phone1, error_phone2]
         for i in phone_list:
             eq = user_platform.register(i)
@@ -436,7 +436,7 @@ class Test04TokenLogin(unittest.TestCase):
     def test_01(self):
         """ 使用正确的Token登陆 """
         # 使用全局token
-        eq = user_platform.login_token(u_token=public_token)
+        eq = user_platform.login_token(token=public_token)
         self.assertEqual(eq['Result']['Msg'], '成功')
 
     def test_02(self):
@@ -444,7 +444,7 @@ class Test04TokenLogin(unittest.TestCase):
         error_srt = ['1', '@', 'a']
         for i in error_srt:
             tokens = public_token + i
-            eq = user_platform.login_token(u_token=tokens)
+            eq = user_platform.login_token(token=tokens)
             self.assertEqual(eq['Result']['Msg'], '[20] 身份验证失败')
             time.sleep(0.5)
         for x in error_srt:
@@ -455,7 +455,7 @@ class Test04TokenLogin(unittest.TestCase):
 
     def test_03(self):
         """ token 为空 """
-        eq = user_platform.login_token(u_token='')
+        eq = user_platform.login_token(token='')
         self.assertEqual(eq['Result']['Msg'], '[20] 身份验证失败')
 
     def test_04(self):
@@ -466,7 +466,7 @@ class Test04TokenLogin(unittest.TestCase):
         """登陆源参数 """
         source = [1, 2, 3]
         for i in source:
-            eq = user_platform.login_token(public_token, login_source=i)
+            eq = user_platform.login_token(token=public_token, login_source=i)
             time.sleep(0.5)
             self.assertEqual(eq['Result']['Msg'], '成功')
 
@@ -474,7 +474,7 @@ class Test04TokenLogin(unittest.TestCase):
         """ 登陆源错误 """
         source = [14, "@", 'a', '']
         for i in source:
-            eq = user_platform.login_token(public_token, login_source=i)
+            eq = user_platform.login_token(token=public_token, login_source=i)
             self.assertEqual(eq['Result']['Msg'], '[21] 参数错误')
             time.sleep(0.5)
 
@@ -594,7 +594,7 @@ class Test07ResetPassword(unittest.TestCase):
             self.assertEqual(eq['Result']['Msg'], "[1002] 手机验证码错误")
 
     def test_06(self):
-        """正常修改"""
+        """ 正常修改 """
         ok_password = ['a1234567', 'password12345678', 'zxc123..']
         for i in ok_password:
             eq = user_platform.reset_password(phone_number=public_phone, new_password=i, token=public_token)
@@ -602,14 +602,14 @@ class Test07ResetPassword(unittest.TestCase):
             time.sleep(0.5)
 
     def test_07(self):
-        """密码中包含特殊字符"""
+        """ 密码中包含特殊字符 """
         password = ['aaaa@！@#￥%', '123456@！@#￥%']
         for i in password:
             eq = user_platform.reset_password(new_password=i, token=public_token)
             self.assertEqual(eq['Result']['Msg'], '成功')
 
     def test_08(self):
-        """密码只包含一种字符"""
+        """ 密码只包含一种字符 """
         # Todo: 预期与实际不符
         error_password = ['password', '123456789', '@@@@@@@@@']
         for i in error_password:
@@ -618,7 +618,7 @@ class Test07ResetPassword(unittest.TestCase):
             time.sleep(0.5)
 
     def test_09(self):
-        """密码长度错误"""
+        """ 密码长度错误 """
         # Todo: 预期与实际不符, 预期8-16位字符
         error_password = ['123456a', '12345a6sd4a6sd123']
         for i in error_password:
@@ -627,7 +627,7 @@ class Test07ResetPassword(unittest.TestCase):
             self.assertNotEqual(eq['Result']['Msg'], '成功')
 
     def test_10(self):
-        """新密码为空"""
+        """ 新密码为空 """
         # Todo: 实际与预期不符
         eq = user_platform.reset_password(new_password='', token=public_token)
         self.assertNotEqual(eq['Result']['Msg'], '成功')
@@ -637,7 +637,7 @@ class Test07ResetPassword(unittest.TestCase):
 class Test08BindBank(unittest.TestCase):
 
     def test_01(self):
-        """正常绑定，获取绑定信息，解除绑定银行卡"""
+        """ 正常绑定，获取绑定信息，解除绑定银行卡 """
         # 获取所有银行信息
         bank_info = api_data.get_bank_dict(token=public_token)
         time.sleep(2)
@@ -710,7 +710,7 @@ class Test08BindBank(unittest.TestCase):
 
 
 class Test09SetPricePassword(unittest.TestCase):
-    """只有新注册的账号才能设定资金密码"""
+    """ 只有新注册的账号才能设定资金密码 """
 
     def test_01(self):
         """正常设定"""
@@ -755,7 +755,6 @@ class Test09SetPricePassword(unittest.TestCase):
 
     def test_06(self):
         """设定资金密码与登录密码一致"""
-        # Todo: 此功能未实现，预期登录密码与实际密码不能一致
         # 登录密码为zxc123..
         login_password = 'zxc123..'
         new_user = user_platform.register(only_phone=True)
