@@ -22,11 +22,11 @@ class UserPlatform(object):
     def __init__(self):
         self.api_coinrise_vip = r'G:\BlockChain\services\ssl\api_coinrise_vip'
         self.coinrise_vip = r'G:\BlockChain\services\ssl\coinrise_vip'
-        # self.host = server_conf['server']     # 测试环境
+        # self.host = server_conf['test_server']     # 测试环境
         self.host = server_conf['dev_server']   # 正式环境
         self.header = {'Version': '0.0', 'Token': '', 'Connection': 'close', 'User-Agent': self.ua.random}
 
-    def get_sms(self, phone_number=None, types=1):
+    def get_sms(self, phone_number=None, types=1) -> dict:
         # 获取一条验证码信息 types: 1注册 3设置资金密码 4修改资金密码 5登陆身份验证 6修改登陆密码 7提币验证码 8商家验证码登陆
         logger.info('获取短信验证码'.center(30, '*'))
         time.sleep(0.2)
@@ -43,7 +43,8 @@ class UserPlatform(object):
         return response.json()
 
     def register(self, phone_number=None, code: str = "123456", password: str = 'zxc123..',
-                       invite_code: str = '2FcNby', register_source=1, ip: str = "", machin_id="", only_phone=False):
+                       invite_code: str = '2FcNby', register_source=1, ip: str = "", machin_id="",
+                 only_phone=False) -> dict:
         # 注册账户api
         # only_phone为true时 只返回手机号
         # 如没有传入手机号参，则随机选取一个未注册的手机号
@@ -66,7 +67,8 @@ class UserPlatform(object):
             return response.json()
 
     def login_account(self, phone_number="13100010001", password='zxc123..', login_source=1,
-                      verification_code='123456', ip='', machin_id='', need_verification_code=1, only_token=False):
+                      verification_code='123456', ip='', machin_id='', need_verification_code=1,
+                      only_token=False) -> dict or str:
         # 密码方式进行登录账户need_verification_code: 是否需要验证码1 需要， 2 不需要
         # only_token为True时只返回token
         api = self.host['vip'] + '/general/login'
@@ -78,26 +80,24 @@ class UserPlatform(object):
             data['PhoneVerificationCode'] = verification_code
             logger.info(str(self.header))
 
-        logger.info(str(data))
         response = requests.post(url=api, json=data, headers=self.header, verify=False)
         if response.status_code != 200:
             logger.error('服务器未启动'.center(30, '='))
             raise ConnectionError
         logger.info(str(response.json()))
+
         if only_token:
             # 只返回Token值
             return response.json()['Token']
         else:
             return response.json()
 
-    def login_token(self, login_source=1, ip: str = '', machin_id: str = '', token=None):
+    def login_token(self, login_source=1, ip: str = '', machin_id: str = '', token=None) -> dict:
         """ 使用token登陆 """
         logger.info("使用token进行登录".center(30, '*'))
         api = self.host['vip'] + '/general/tokenlogin'
         data = {'LoginSource': login_source, 'IP': ip, 'MachinID': machin_id}
         self.header['Token'] = token
-        logger.info(str(self.header))
-        logger.info(str(data))
         response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
@@ -107,7 +107,6 @@ class UserPlatform(object):
         api = self.host['vip'] + '/general/info'
         logger.info('获取当前用户信息'.center(30, '*'))
         self.header['Token'] = tokens
-        logger.info(str(self.header))
         response = requests.post(url=api, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
@@ -137,7 +136,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def modify_password(self, token='zxc123..', new_password='zxc123..', phone_veri_code='123456'):
+    def modify_password(self, token='zxc123..', new_password='zxc123..', phone_veri_code='123456') -> dict:
         """ 修改账户密码 """
         logger.info('修改密码'.center(30, '*'))
         api = self.host['vip'] + '/general/pw/modify'
@@ -146,9 +145,9 @@ class UserPlatform(object):
         logger.info(str(data))
         response = requests.post(url=api, data=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
-        return response
+        return response.json()
 
-    def check_veri(self, phone_number: str, verification_code: str, types: str):
+    def check_veri(self, phone_number: str, verification_code: str, types: str) -> dict:
         """ 校验手机验证码 """
         logger.info('验证手机验证码'.center(30, '*'))
         api = self.host + '/api/user/phone/vericheck'
@@ -156,10 +155,10 @@ class UserPlatform(object):
         logger.info(str(data))
         response = requests.post(url=api, data=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
-        return response
+        return response.json()
 
     def bind_bank_card(self, bank_id: int, card_number: str, card_owner: str,
-                       bank_addr: str, price_password: str, token):
+                       bank_addr: str, price_password: str, token) -> dict:
         """ 绑定银行卡 """
         logger.info('绑定银行卡'.center(30, '*'))
         api = self.host['vip'] + '/general/bank/bind'
@@ -172,7 +171,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def relieve_bank(self, u_id: int, password: str, token):
+    def relieve_bank(self, u_id: int, password: str, token) -> dict:
         """ 解绑银行卡 """
         logger.info('解除银行卡绑定'.center(30, '*'))
         api = self.host['vip'] + '/general/bank/delete'
@@ -183,7 +182,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def bind_bank_info(self, user_id: int, token):
+    def bind_bank_info(self, user_id: int, token) -> dict:
         """ 获取绑定银行信息 """
         api = self.host + '/general/bank/search'
         data = {'UserID': user_id}
@@ -191,9 +190,9 @@ class UserPlatform(object):
         logger.info(str(self.header))
         response = requests.post(url=api, data=data, headers=self.header)
         logger.info(str(response.json()))
-        return response
+        return response.json()
 
-    def set_price_password(self, phone_vericode='123456', password='a12345678', token=None):
+    def set_price_password(self, phone_vericode='123456', password='a12345678', token=None) -> dict:
         """ 设定资金密码 """
         logger.info('设定资金密码'.center(30, '*'))
         api = self.host['vip'] + '/general/fundpw/set'
@@ -205,7 +204,8 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def modify_price_password(self, new_password, old_password='a12345678', phone_veri_code='123456', tokens=None):
+    def modify_price_password(self, new_password, old_password='a12345678',
+                              phone_veri_code='123456', tokens=None) -> dict:
         """ 修改资金密码 """
         logger.info('修改资金密码'.center(30, '*'))
         api = self.host['vip'] + '/general/fundpw/modify'
@@ -217,7 +217,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def check_price_token(self, token, price_password, only_price_token=True):
+    def check_price_token(self, token, price_password, only_price_token=True) -> dict or str:
         """ 检验资金密码 """
         logger.info('校验资金密码'.center(30, '*'))
         api = self.host['vip'] + '/general/fundpw/check'
@@ -230,7 +230,7 @@ class UserPlatform(object):
             return response.json()['Token']
         return response.json()
 
-    def wallet_token(self, token, fund_token):
+    def wallet_token(self, token, fund_token) -> dict:
         api = self.host['vip'] + '/general/fundpw/checktoken'
         self.header['Token'] = token
         data = {"FundToken": fund_token}
@@ -238,7 +238,7 @@ class UserPlatform(object):
         return response.json()
 
     def real_name_auth(self, name='lopo', country='中国', complexs="", address='深圳',
-                       card_type=1, card_code=None, id_card_front="", id_card_back="", token=None):
+                       card_type=1, card_code=None, id_card_front="", id_card_back="", token=None) -> dict:
         """
         实名认证
         :param name: 真实姓名
@@ -265,7 +265,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def real_name_info(self, token):
+    def real_name_info(self, token) -> dict:
         """ 查找自己的实名认证信息 """
         logger.info('实名认证信息'.center(30, '*'))
         api = self.host + '/user/general/real/search'
@@ -273,9 +273,9 @@ class UserPlatform(object):
         logger.info(str(self.header))
         response = requests.post(url=api, headers=self.header, verify=False)
         logger.info(str(response.json()))
-        return response
+        return response.json()
 
-    def real_name_cancel(self, token):
+    def real_name_cancel(self, token) -> dict:
         """ 取消实名 """
         logger.info('取消实名'.center(30, "*"))
         api = self.host['vip'] + '/general/real/cancel'
@@ -285,7 +285,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def upload_img(self, file_path, account, types, token, expired_time=None):
+    def upload_img(self, file_path, account, types, token, expired_time=None) -> str:
         # 上传图片文件到服务器 file_path: 本地文件路径
         # expired_time 为可选参数 account: 账户id
         # types:  头像：user 认证：identity_authentication 二维码：QR_code
@@ -302,7 +302,7 @@ class UserPlatform(object):
         img_url = json.loads(response.text)['Msg']
         return img_url
 
-    def bind_qr_img(self, img_address, pay_type: int, account, password, token, mark="asd",):
+    def bind_qr_img(self, img_address, pay_type: int, account, password, token, mark="asd",) -> dict:
         """ 绑定收款二维码 """
         logger.info('绑定收款二维码'.center(30, '*'))
         api = self.host['vip'] + '/api/user/payqr/bind'
@@ -313,7 +313,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def relieve_qr_img(self, u_id, password, token):
+    def relieve_qr_img(self, u_id, password, token) -> dict:
         """ 解绑收款二维码 """
         logger.info('取消绑定收款二维码'.center(30, '*'))
         api = self.host['vip'] + '/api/user/payqr/delete'
@@ -324,7 +324,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def get_qr_code(self, user_id, token, only_id=False):
+    def get_qr_code(self, user_id, token, only_id=False) -> dict or list:
         # only_id 为True时，将返回一个列表，包含所有收款二维码ID
         logger.info('获取绑定收款信息'.center(30, '*'))
         api = self.host['vip'] + '/api/user/payqr/search'
@@ -345,7 +345,7 @@ class UserPlatform(object):
                 return response.json()
         return response.json()
 
-    def get_all_info(self, user_id, token):
+    def get_all_info(self, user_id, token) -> dict:
         """获取银行卡及收款二维码信息"""
         logger.info('获取银行卡及收款二维码信息'.center(30, '*'))
         api = self.host['vip'] + '/api/user/bankpayqr/search'
@@ -356,19 +356,17 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def create_wallet(self, coin_id, token):
+    def create_wallet(self, coin_id, token) -> dict:
         """ 创建钱包 币种ID是指BTC、ETH等币种"""
         logger.info('创建钱包'.center(30, '*'))
         api = self.host["vip"] + '/general/wallet/create'
         data = {'CoinID': coin_id}
         self.header['Token'] = token
-        logger.info(str(self.header))
-        logger.info(str(data))
         response = requests.post(url=api, json=data, headers=self.header, verify=False)
         logger.info(str(response.json()))
         return response.json()
 
-    def get_coin_wallet(self, coin_id, token):
+    def get_coin_wallet(self, coin_id, token) -> dict:
         """ 获取指定币种钱包 """
         logger.info('获取指定钱包'.center(30, '*'))
         api = self.host['vip'] + '/general/wallet/search'
@@ -379,7 +377,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def get_all_wallet(self, token):
+    def get_all_wallet(self, token) -> dict:
         """ 获取用户所有钱包 """
         logger.info('获取用户所有钱包'.center(30, '*'))
         api = self.host['vip'] + '/general/wallet/searchall'
@@ -389,7 +387,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def detailed_commission(self, coin_id, start_time, page_index, page_count, end_time, token):
+    def detailed_commission(self, coin_id, start_time, page_index, page_count, end_time, token) -> dict:
         """ 获取返佣明细 time格式为：20190701000000"""
         logger.info('获取币种信息'.center(30, '*'))
         api = self.host['vip'] + '/general/wallet/rebate/search'
@@ -401,7 +399,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def recharge_coin_record(self, record_type, page_index, page_count, token):
+    def recharge_coin_record(self, record_type, page_index, page_count, token) -> dict:
         """ 获取充币提币记录 record_type: 1：所有 2：充币 3：提币"""
         logger.info('获取充提币记录'.center(30, '*'))
         api = self.host["vip"] + '/api/user/wallet/iorecord/search'
@@ -412,7 +410,7 @@ class UserPlatform(object):
         logger.info(str(response.json()))
         return response.json()
 
-    def extract_coin(self, coin_id, amount, decimal, password, address, phone_veri_code):
+    def extract_coin(self, coin_id, amount, decimal, password, address, phone_veri_code) -> dict:
         """ 提币 Api"""
         logger.info('提币操作'.center(30, '*'))
         api = self.host + '/api/user/wallet/withdraw'

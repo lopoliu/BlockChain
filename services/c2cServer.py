@@ -27,7 +27,7 @@ class C2CServer(object):
 
     def add_buy(self, u_id, biz_id=0, buy_type=1, decimal=2, amount=100,
                 price=22200, payment_method=2, token=None, price_token=None):
-        """ 买入 """
+        """ 买用户新增买单 """
         logger.info('用户新增买单'.center(30, '*'))
         api = self.host + '/v1/user/order/addbuy'
         self.header['Token'] = token
@@ -41,6 +41,7 @@ class C2CServer(object):
     def add_sell(self, u_id, biz_id=0, buy_type=1, decimal=2, amount=100,
                  price=22200, payment_method=2, token=None, price_token=None):
         """ 用户新增卖单 """
+        # 除了接口地址外，其他参数完全与买单易之
         logger.info('用户新增卖单'.center(30, '*'))
         api = self.host + '/v1/user/order/addsell'
         self.header['Token'] = token

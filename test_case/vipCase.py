@@ -2,7 +2,6 @@
 # /use/bin/env python3
 
 import unittest
-import yaml
 import time
 import random
 from services.vipServer import UserPlatform
@@ -11,11 +10,6 @@ from dbs.redis_db import SmsRedis
 from dbs.sql_data import MySql
 
 __Author__ = 'Lopo'
-
-# 读取配置文件
-file = open('../config/parameter.yaml', 'r')
-config = yaml.load(file)
-file.close()
 
 user_platform = UserPlatform()      # 实例一个vip Api服务器
 api_data = ApiData()

@@ -26,7 +26,7 @@ class CounterServer(object):
         self.ws.send(json.dumps(data))
         logger.info(self.ws.recv())
 
-    def order(self, trade_coin_id: str, direction: int = 66):
+    def order(self, trade_coin_id: str, direction: int = 66) -> dict:
         """ 委托下单 """
         coin_data = None
         # 价格与价格小数位
@@ -45,6 +45,7 @@ class CounterServer(object):
                          'VolumeDecimal': volume_decimal, 'OrderSouce': 85, 'OrderType': 1, 'CustomInfo': 'test'}
 
         elif trade_coin_id == 'BTC':
+            # 除 ETH币种交易外，其他币种暂未实现
             pass
 
         elif trade_coin_id == 'LTC':
